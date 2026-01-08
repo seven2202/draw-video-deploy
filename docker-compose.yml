@@ -1,0 +1,124 @@
+# ============================================
+# Draw Video Docker Compose 生产环境配置
+# ============================================
+
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: draw-video-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-123456}
+      MYSQL_DATABASE: ${DB_NAME:-draw_video}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - draw-video-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: draw-video-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - draw-video-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 后端服务
+  backend:
+    image: seven222/draw-video-backend:latest
+    container_name: draw-video-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # 数据库配置
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-draw_video}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-123456}
+
+      # Redis 配置
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: 0
+
+      # JWT 配置
+      JWT_SECRET: ${JWT_SECRET:-iWUh/1sl11C012YbaWorbLjWIiNtRV196xKeQ60kAHXbjoCDMTGhBtXzeNDJVgPv}
+
+      # MyBatis SQL 日志配置（生产环境建议关闭）
+      MYBATIS_LOG_IMPL: ${MYBATIS_LOG_IMPL:-org.apache.ibatis.logging.nologging.NoLoggingImpl}
+
+      # 文件配置
+      UPLOAD_DIR: /app/public/uploads
+      FILE_BASE_URL: ${FILE_BASE_URL:-https://your-domain.com}
+    volumes:
+      - upload_data:/app/public/uploads
+      # 挂载宿主机 machine-id 用于授权绑定
+      - /etc/machine-id:/host/machine-id:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - draw-video-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端服务
+  frontend:
+    image: seven222/draw-video-frontend:latest
+    container_name: draw-video-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # API 后端地址（内部通信）
+      API_URL: http://backend:8080
+      NODE_ENV: production
+    depends_on:
+      - backend
+    networks:
+      - draw-video-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  upload_data:
+    driver: local
+
+networks:
+  draw-video-network:
+    driver: bridge

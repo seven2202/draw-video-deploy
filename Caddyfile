@@ -1,0 +1,82 @@
+domain {
+
+        # 日志
+        log {
+                output file /var/log/caddy/draw-video.log {
+                        roll_size 100mb
+                        roll_keep 10
+                }
+        }
+
+        # 安全头
+        header {
+                # 启用 HSTS
+                Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+                # 防止点击劫持
+                X-Frame-Options "SAMEORIGIN"
+                # 防止 MIME 类型嗅探
+                X-Content-Type-Options "nosniff"
+                # XSS 保护
+                X-XSS-Protection "1; mode=block"
+                # Referrer 策略
+                Referrer-Policy "no-referrer-when-downgrade"
+                # 移除 Server 头
+                -Server
+        }
+
+        # 请求体大小限制
+        request_body {
+                max_size 20MB
+        }
+
+        # API 代理
+        handle /api/* {
+                reverse_proxy localhost:8080 {
+                        # 健康检查
+                        health_uri /actuator/health
+                        health_interval 10s
+                        health_timeout 5s
+
+                        # 头部传递
+                        header_up Host {host}
+                        header_up X-Real-IP {remote_host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                }
+        }
+
+        # 健康检查端点
+        handle /actuator/health {
+                reverse_proxy localhost:8080
+        }
+
+        # 静态文件（上传的图片和视频）
+        handle /uploads/* {
+                reverse_proxy localhost:8080
+
+                # 缓存配置
+                header Cache-Control "public, max-age=604800, immutable"
+        }
+
+        # Next.js 静态资源
+        handle /_next/static/* {
+                reverse_proxy localhost:3000
+
+                # 长期缓存
+                header Cache-Control "public, max-age=31536000, immutable"
+        }
+
+        # 前端应用（默认）
+        handle {
+                reverse_proxy localhost:3000 {
+                        # 头部传递
+                        header_up Host {host}
+                        header_up X-Real-IP {remote_host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                }
+        }
+
+        # Gzip 压缩（Caddy 默认启用）
+        encode gzip zstd
+}

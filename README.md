@@ -270,8 +270,8 @@ docker compose up -d
 ## 联系支持
 
 如遇到部署问题或需要获取授权，请联系作者或提交 Issue。
-后台->系统设置->授权管理，提供机器码联系我
 
-<img src="https://github.com/user-attachments/assets/9877fa2d-79bf-437b-a3b6-819ba495bd41" width="600" />
-<img width="2940" height="1462" alt="image" src="https://github.com/user-attachments/assets/f02b91fb-bc9b-41ca-87f4-7041329db33f" />
+### 后台->系统设置->授权管理，提供机器码联系我
+
+<img src="https://github.com/user-attachments/assets/9877fa2d-79bf-437b-a3b6-819ba495bd41" width="300" />
 

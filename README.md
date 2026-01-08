@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Draw Video 是一个视频绘制应用，采用前后端分离架构，使用 Docker Compose 进行容器化部署。
+Draw Video 是一个图片、视频绘制应用，采用前后端分离架构，使用 Docker Compose 进行容器化部署。
 
 ### 技术栈
 

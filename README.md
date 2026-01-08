@@ -85,6 +85,15 @@ docker compose logs -f
 等待所有服务健康检查通过后，访问：
 - 前端：http://your-server-ip:3000
 - 后端 API：http://your-server-ip:8080
+- 后台管理：http://your-server-ip:3000/admin
+
+### 默认账号
+
+| 账号 | 密码 |
+|------|------|
+| admin@qq.com | admin123 |
+
+> **安全提示**：首次登录后请立即修改默认密码！
 
 ---
 
@@ -182,37 +191,16 @@ docker exec -i draw-video-mysql mysql -u root -p$DB_PASSWORD draw_video < backup
 
 ---
 
-## Nginx 反向代理配置（可选）
+## 反向代理配置（可选）
 
-如果需要使用 Nginx 作为反向代理，参考以下配置：
+项目提供了 Nginx 和 Caddy 两种反向代理配置，选择其一即可：
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
+| 配置文件 | 说明 |
+|----------|------|
+| `nginx.conf` | Nginx 反向代理配置，包含 SSL、安全头、缓存等 |
+| `Caddyfile` | Caddy 反向代理配置，自动 HTTPS |
 
-    # 前端
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # 后端 API
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # 文件上传大小限制
-    client_max_body_size 100M;
-}
-```
+使用前请将配置文件中的 `your-domain.com` / `domain` 替换为你的实际域名。
 
 ---
 
@@ -273,6 +261,12 @@ docker compose up -d
 
 ---
 
+## 授权说明
+
+本项目为商业软件，需要授权后方可使用。如需获取授权，请联系作者。
+
+---
+
 ## 联系支持
 
-如遇到部署问题，请联系技术支持或提交 Issue。
+如遇到部署问题或需要获取授权，请联系作者或提交 Issue。

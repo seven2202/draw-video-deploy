@@ -69,7 +69,7 @@ services:
       REDIS_DB: 0
 
       # JWT 配置
-      JWT_SECRET: ${JWT_SECRET:-iWUh/1sl11C012YbaWorbLjWIiNtRV196xKeQ60kAHXbjoCDMTGhBtXzeNDJVgPv}
+      JWT_SECRET: ${JWT_SECRET:-需要修改自定义jwt}
 
       # MyBatis SQL 日志配置（生产环境建议关闭）
       MYBATIS_LOG_IMPL: ${MYBATIS_LOG_IMPL:-org.apache.ibatis.logging.nologging.NoLoggingImpl}

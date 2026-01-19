@@ -26,7 +26,7 @@ domain {
 
         # 请求体大小限制
         request_body {
-                max_size 20MB
+                max_size 100MB
         }
 
         # API 代理
@@ -40,8 +40,6 @@ domain {
                         # 头部传递
                         header_up Host {host}
                         header_up X-Real-IP {remote_host}
-                        header_up X-Forwarded-For {remote_host}
-                        header_up X-Forwarded-Proto {scheme}
                 }
         }
 
@@ -72,8 +70,6 @@ domain {
                         # 头部传递
                         header_up Host {host}
                         header_up X-Real-IP {remote_host}
-                        header_up X-Forwarded-For {remote_host}
-                        header_up X-Forwarded-Proto {scheme}
                 }
         }
 

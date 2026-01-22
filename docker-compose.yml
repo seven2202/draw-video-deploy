@@ -16,6 +16,9 @@ services:
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
       TZ: Asia/Shanghai
+    command:
+      - --log-bin=mysql-bin                # 显式启用 binlog（MySQL 8 默认已启用，但写上更清晰）
+      - --binlog_expire_logs_seconds=259200  # 3 259200 秒），可改成你想要的时间    
     volumes:
       - mysql_data:/var/lib/mysql
     networks:

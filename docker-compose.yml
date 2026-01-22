@@ -20,7 +20,7 @@ services:
       - --log-bin=mysql-bin                # 显式启用 binlog（MySQL 8 默认已启用，但写上更清晰）
       - --binlog_expire_logs_seconds=259200  # 3 259200 秒），可改成你想要的时间    
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
     networks:
       - draw-video-network
     healthcheck:
@@ -38,7 +38,7 @@ services:
       TZ: Asia/Shanghai
     command: redis-server --appendonly yes
     volumes:
-      - redis_data:/data
+      - ./data/redis:/data
     networks:
       - draw-video-network
     healthcheck:
@@ -81,8 +81,7 @@ services:
       UPLOAD_DIR: /app/public/uploads
       FILE_BASE_URL: ${FILE_BASE_URL:-https://your-domain.com}
     volumes:
-      - upload_data:/app/public/uploads
-      # 挂载宿主机 machine-id 用于授权绑定
+      - ./data/backend:/app/public/uploads
       - /etc/machine-id:/host/machine-id:ro
     depends_on:
       mysql:
@@ -120,15 +119,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
-
-volumes:
-  mysql_data:
-    driver: local
-  redis_data:
-    driver: local
-  upload_data:
-    driver: local
 
 networks:
   draw-video-network:
